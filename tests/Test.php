@@ -2,11 +2,12 @@
 
 namespace Tests;
 
-use GuzzleHttp\HandlerStack;
-use PHPUnit\Framework\TestCase;
+use Codewiser\GuzzleCaching\ArrayCache;
 use Codewiser\GuzzleCaching\CacheControlStorage;
 use Codewiser\GuzzleCaching\Middlewares\CacheResponse;
 use Codewiser\GuzzleCaching\Middlewares\ReuseCachedResponse;
+use GuzzleHttp\HandlerStack;
+use PHPUnit\Framework\TestCase;
 
 abstract class Test extends TestCase
 {

@@ -2,10 +2,11 @@
 
 namespace Tests;
 
+use Codewiser\GuzzleCaching\ArrayCache;
+use Codewiser\GuzzleCaching\CacheControlStorage;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use Codewiser\GuzzleCaching\CacheControlStorage;
 
 class VaryTest extends TestCase
 {

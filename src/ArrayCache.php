@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Codewiser\GuzzleCaching;
 
 use Psr\SimpleCache\CacheInterface;
 
