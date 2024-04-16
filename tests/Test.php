@@ -4,9 +4,9 @@ namespace Tests;
 
 use GuzzleHttp\HandlerStack;
 use PHPUnit\Framework\TestCase;
-use Pm\GuzzleCaching\CacheControlStorage;
-use Pm\GuzzleCaching\Middlewares\CacheResponse;
-use Pm\GuzzleCaching\Middlewares\ReuseCachedResponse;
+use Codewiser\GuzzleCaching\CacheControlStorage;
+use Codewiser\GuzzleCaching\Middlewares\CacheResponse;
+use Codewiser\GuzzleCaching\Middlewares\ReuseCachedResponse;
 
 abstract class Test extends TestCase
 {

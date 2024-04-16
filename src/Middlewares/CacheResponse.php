@@ -1,9 +1,9 @@
 <?php
 
-namespace Pm\GuzzleCaching\Middlewares;
+namespace Codewiser\GuzzleCaching\Middlewares;
 
 use GuzzleHttp\Psr7\Utils;
-use Pm\GuzzleCaching\CacheControlStorage;
+use Codewiser\GuzzleCaching\CacheControlStorage;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 

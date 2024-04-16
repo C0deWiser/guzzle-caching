@@ -1,14 +1,10 @@
 <?php
 
-namespace Pm\GuzzleCaching;
+namespace Codewiser\GuzzleCaching;
 
-use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
-
-use function PHPUnit\Framework\assertFalse;
-use function PHPUnit\Framework\assertTrue;
 
 class CacheControlStorage
 {

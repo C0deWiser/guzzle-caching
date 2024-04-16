@@ -1,6 +1,6 @@
 <?php
 
-namespace Pm\GuzzleCaching;
+namespace Codewiser\GuzzleCaching;
 
 class CacheControlHeader
 {

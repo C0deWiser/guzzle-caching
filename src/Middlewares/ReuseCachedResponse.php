@@ -1,8 +1,8 @@
 <?php
 
-namespace Pm\GuzzleCaching\Middlewares;
+namespace Codewiser\GuzzleCaching\Middlewares;
 
-use Pm\GuzzleCaching\CacheControlStorage;
+use Codewiser\GuzzleCaching\CacheControlStorage;
 use Psr\Http\Message\RequestInterface;
 
 class ReuseCachedResponse

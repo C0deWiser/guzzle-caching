@@ -1,10 +1,10 @@
 {
-    "name": "pm/guzzle-caching",
+    "name": "codewiser/guzzle-caching",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Pm\\GuzzleCaching\\": "src/"
+            "Codewiser\\GuzzleCaching\\": "src/"
         }
     },
     "autoload-dev": {

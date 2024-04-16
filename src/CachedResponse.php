@@ -1,6 +1,6 @@
 <?php
 
-namespace Pm\GuzzleCaching;
+namespace Codewiser\GuzzleCaching;
 
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;

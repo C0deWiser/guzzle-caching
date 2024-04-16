@@ -3,7 +3,7 @@
 namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-use Pm\GuzzleCaching\CachedResponse;
+use Codewiser\GuzzleCaching\CachedResponse;
 
 class CachedResponseTest extends TestCase
 {

@@ -1,21 +1,42 @@
 # Caching Guzzle
 
+This package bring caching layer to the Guzzle library. 
+Caching managed by response headers, such as `Cache-Control` and others.
+
 ## Usage
 
+Add two middlewares to the Guzzle default handler stack. 
+One to the top, next to the bottom.
+
+First middleware will examine existing caches and reuse cached requests.
+Otherwise, it may add conditional headers to the request.
+
+Second middleware will examine server response and cache it, if required.
+
 ```php
+use Codewiser\GuzzleCaching\CacheControlStorage;
+use Codewiser\GuzzleCaching\Middlewares\ReuseCachedResponse;
+use Codewiser\GuzzleCaching\Middlewares\CacheResponse;
 
 $cache = // Any Psr\SimpleCache\CacheInterface
 $storage = CacheControlStorage::make($cache);
 
-$handler = HandlerStack::create();
+$handler = \GuzzleHttp\HandlerStack::create();
 $handler->unshift(new ReuseCachedResponse($storage), 'reuse_cached');
 $handler->push(new CacheResponse($storage), 'cache_response');
 
-$client = new Client([
+$client = new \GuzzleHttp\Client([
     'handler' => $handler,
     'base_uri' => 'https://example.com'
 ]);
+```
 
+## Testing
+
+Start web-server before running tests:
+
+```shell
+php -S localhost:8000 -t public/
 ```
 
 ## Состояние кеша
