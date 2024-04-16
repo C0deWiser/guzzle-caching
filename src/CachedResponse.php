@@ -84,7 +84,7 @@ class CachedResponse
             $maxAge = $cacheControl->maxAge() - $this->age();
 
             if ($date = $this->date()) {
-                $expires = $date->add(new \DateInterval('PT' . $maxAge . 'S'));
+                $expires = $date->add(new \DateInterval('PT'.$maxAge.'S'));
             }
         } else {
             $expires = $this->expires();
@@ -124,9 +124,7 @@ class CachedResponse
 
         if (isset($this->headers['ETag'])) {
             $headers['If-None-Match'] = $this->headers['ETag'];
-        }
-
-        if (isset($this->headers['Last-Modified'])) {
+        } elseif (isset($this->headers['Last-Modified'])) {
             $headers['If-Modified-Since'] = $this->headers['Last-Modified'];
         }
 

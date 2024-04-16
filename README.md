@@ -1,12 +1,12 @@
 # Caching Guzzle
 
-This package bring caching layer to the Guzzle library. 
-Caching managed by response headers, such as `Cache-Control` and others.
+This package brings caching layer to the Guzzle library. Cache is managed by
+response headers, such as `Cache-Control` and others.
 
 ## Usage
 
-Add two middlewares to the Guzzle default handler stack. 
-One to the top, next to the bottom.
+Add two middlewares to the Guzzle default handler stack. One to the top, next to
+the bottom.
 
 First middleware will examine existing caches and reuse cached requests.
 Otherwise, it may add conditional headers to the request.
@@ -39,66 +39,104 @@ Start web-server before running tests:
 php -S localhost:8000 -t public/
 ```
 
-## Состояние кеша
+## Cache management
 
-Сохраненный ответ может быть в двух состояниях: `fresh` или `stale`.
+### Stored responses states
 
-«Свежесть» или «тухлость» определяется исходя из «возраста» 
-— времени, прошедшего с момента создания ответа на сервере.
+Stored HTTP responses have two states: `fresh` and `stale`. The `fresh` state
+usually indicates that the response is still valid and can be reused, while
+the `stale`
+state means that the cached response has already expired.
 
-Период «свежести» задается значением директивы `Cache-Control: max-age=<seconds>`.
-Или, если `max-age` не передан, значением заголовка ответа `Expires`.
+The criterion for determining when a response is `fresh` and when it is `stale`
+is age. In HTTP, age is the time elapsed since the response was generated. This
+is similar to the TTL in other caching mechanisms.
 
-Возраст вычисляется относительно заголовка ответа `Date`.
-Если в ответе сервера есть заголовок `Age`, он уменьшает значение директивы `max-age`.
+`max-age` directive is not the elapsed time since the response was received; it
+is the elapsed time since the response was generated on the origin
+server (`Date` response header). So if the other cache(s) — on the network route
+taken by the response — store the response for 100 seconds (indicated using
+the `Age` response header field), the client's cache would deduct 100 seconds
+from its freshness lifetime.
 
-## Ключ кеширования
+The `Expires` HTTP header contains the date/time after which the response is
+considered expired.
 
-Непосредственным ключом для кеширования является комбинация метода и адреса запроса (только `GET` и `HEAD`).
-Однако сервер может вернуть заголовок `Vary`, в котором будут перечислены заголовки, оказывающие влияние на ключ кеширования.
+If there is a `Cache-Control` header with the `max-age` directive in the
+response, the `Expires` header is ignored.
 
-Например, если `Vary: Accept-Language`, то запросы к этому ресурсу с разными `Accept-Language`,
-должны кешироваться отдельно друг от друга.
+### Caching keys
 
-## Стратегии ревалидации
+Requests are differs by method and uri (we will cache only `GET` and `HEAD`
+requests).
 
-Кешируем только `GET` и `HEAD` запросы и `200` ответы.
+The `Vary` HTTP response header describes the parts of the request message aside
+from the method and URL that influenced the content of the response it occurs
+in. Most often, this is used to create a cache key when content negotiation is
+in use.
+
+## Caching directives
+
+We will cache only `GET` and `HEAD` requests and `200` responses.
 
 ### `no-store`
 
-Если сервер вернул `Cache-Control: no-store` — кеширование не производится, сохраненный кеш удаляется.
-Остальные директивы игнорируются.
+The `no-store` response directive indicates that any caches of any kind (private
+or shared) should not store this response.
+
+Caching is disabled.
 
 ### `private`
 
-Директива `Cache-Control: private` указывает, что ответ содержит персональные данные и не должен быть в общем кеше.
-Во избежание проблем, мы будем считать её синонимом `Cache-Control: no-store`.
+The `private` response directive indicates that the response can be stored only
+in a private cache (e.g. local caches in browsers).
+
+We will not cache such a responses.
 
 ### `public`
 
-Если запрос содержит заголовок `Authorization`, то ответ может быть сохранен 
-только при наличии в ответе директивы `Cache-Control: public`.
+The `public` response directive indicates that the response can be stored in a
+shared cache. Responses for requests with `Authorization` header fields must not
+be stored in a shared cache; however, the public directive will cause such
+responses to be stored in a shared cache.
+
+In general, when pages are under Basic Auth or Digest Auth, the browser sends
+requests with the `Authorization` header. This means that the response is
+access-controlled for restricted users (who have accounts), and it's
+fundamentally not shared-cacheable, even if it has `max-age`.
 
 ### `no-cache`
 
-Если сервер вернул `Cache-Control: no-cache` - кешируем ответ, но каждый раз он должен быть перепроверен на сервере.
-Подразумеваются условные проверки `In-None-Match` и `If-Modified-Since`.
-То есть, если в ответе не было `ETag` или `Last-Modified` мы делаем полный запрос к серверу, ожидая только `200`.
-Если же мы сделали условный запрос, то, получив `304`, можем использовать ранее сохраненный ответ.
+The `no-cache` response directive indicates that the response can be stored in
+caches, but the response must be validated with the origin server before each
+reuse, even when the cache is disconnected from the origin server.
 
-Директивы `Cache-Control: max-age=0, must-revalidate` являются синонимом `Cache-Control: no-cache`.
+Synonym of `Cache-Control: max-age=0, must-revalidate`.
 
 ### `max-age`
 
-Эта директива в отсутствие других разрешает использование сохраненного ответа, пока он сохраняет «свежесть».
+The `max-age=N` response directive indicates that the response remains `fresh`
+until N seconds after the response is generated.
 
-После утраты «свежести» ответ желательно бы актуализировать. 
-Если нам известны `ETag` или `Last-Modified` — делаем условную проверку. Иначе — полную.
+## Revalidation
 
-Но если сервер недоступен или отвечает `5**` — разрешается использовать несвежий кеш.
-Но в комбинации с `must-revalidate` использование несвежего кеша строго запрещено.
+HTTP allows caches to reuse `stale` responses when they are disconnected from
+the origin server. `must-revalidate` is a way to prevent this from happening -
+either the stored response is revalidated with the origin server or a 504 (
+Gateway Timeout) response is generated.
 
-На директиву `must-revalidate` влияют только `stale-while-revalidate=<seconds>`,
-которая разрешает использование несвежего кеша, если сервер не отвечает, 
-и `stale-if-error=<seconds>`, которая разрешает использование несвежего кеша, 
-если сервер `5**`.
+(To be implemented):
+The `stale-while-revalidate` response directive indicates that the cache could
+reuse a `stale` response while it revalidates it to a cache.
+
+(To be implemented):
+The `stale-if-error` response directive indicates that the cache can reuse a
+`stale` response when an upstream server generates an error, or when the error is
+generated locally. Here, an error is considered any response with a status code
+of `500`, `502`, `503`, or `504`.
+
+`Stale` responses are not immediately discarded. HTTP has a mechanism to
+transform a `stale` response into a `fresh` one by asking the origin server.
+
+Validation is done by using a conditional request that includes an
+`If-Modified-Since` or `If-None-Match` request header.
